@@ -1,0 +1,233 @@
+# MeetingRoomBookingSystem Algorithm
+
+Step 1: Start
+
+Step 2:Initialization:
+
+	Method __init__():
+    		1. Initialize room_names with room names from "Room1" to "Room10".
+    		2. Initialize bookings, users, current_user, and call load_users_from_file().
+
+Step 3: Loop indefinitely:
+    a. Display the main menu:
+        - Print "Menu:"
+        - Print "1. Sign Up"
+        - Print "2. Log In"
+        - Print "3. Forgot Password"
+        - Print "4. Exit"
+    b. Get user's choice for authentication.
+    c. If the choice is '1':
+        - Call signup() method.
+    d. If the choice is '2':
+        - If the current user is already logged in, print "You are already logged in."
+        - Otherwise, call login() method.
+    e. If the choice is '3':
+        - Get the input from the user.
+        - Call forgot_password(username) method.
+    f. If the choice is '4':
+        - Save user data to file.
+        - Exit the loop.
+
+
+
+Step 4: While the current user is logged in:
+    a. Display the booking menu:
+        - Print "Booking Menu:"
+        - Print "1. Create Booking"
+        - Print "2. Read Bookings"
+        - Print "3. Update Booking"
+        - Print "4. Delete Booking"
+        - Print "5. Log Out"
+        - Print "6. Exit"
+    b. Get user's choice for booking management.
+    c. If the choice is '1':
+        - Call display_room_dropdown() method to show available rooms.
+        - Get room_index, start_time, and end_time from the user.
+        - Call create_booking(room_index, start_time, end_time) method.
+    d. If the choice is '2':
+        - Call read_bookings() method to display user's bookings.
+    e. If the choice is '3':
+        - Get the index of the booking to update.
+        - Call display_room_dropdown() method to show available rooms.
+        - Get room_index, new_start_time, and new_end_time from the user.
+        - Call update_booking(index, room_index, new_start_time, new_end_time) method.
+    f. If the choice is '4':
+        - Get the index of the booking to delete.
+        - Call delete_booking(index) method.
+    g. If the choice is '5':
+        - Log out the current user.
+        - Print "You have been logged out."
+    h. If the choice is '6':
+        - Log out the current user.
+        - Exit the loop.
+	Print "Exiting the meeting room booking system."
+
+Step 5: Stop
+
+
+
+Method signup():
+    1. Get username, password, and email from the user.
+    2. Validate email using is_valid_email method.
+    3. Generate a random salt using bcrypt.gensalt().
+    4. Hash the password using bcrypt.hashpw().
+    5. Create a new User instance with the username, hashed password, salt, and email.
+    6. Append the new User instance to the users list.
+    7. Call save_users_to_file() to update the users file.
+    8. Print "Sign up successful!".
+
+
+
+Method login():
+    1. Get username and password from the user.
+    2. Load the user using load_user method.
+    3. If the user is found:
+        a. Extract user's salt and hashed password from the user information.
+        b. Hash the entered password with the stored salt.
+        c. If the hashed password matches the stored hashed password:
+            - Print "Login successful!".
+            - Set the current_user to the logged-in user.
+            - Load user bookings using load_user_bookings method.
+            - Return True.
+        d. If the passwords do not match, print "Incorrect password."
+    4. If the user is not found, print "User not found." and return False.
+
+
+
+Method forgot_password(username):
+    1. Load the user using load_user method.
+    2. If the user is found:
+        a. Get the user's email and validate it using is_valid_email method.
+        b. Prompt the user to enter their email.
+        c. If the entered email matches the stored email and is a valid email:
+            i. Generate a 6-digit OTP using generate_otp method.
+            ii. Send the OTP to the user's email using send_otp_email method.
+            iii. Prompt the user to enter the OTP received in their email.
+            iv. If the entered OTP matches the generated OTP:
+                - Prompt the user to enter a new password using getpass.
+                - Generate a new salt using bcrypt.gensalt().
+                - Hash the new password with the new salt.
+                - Update the user's password and salt using update_password method.
+                - Save the updated user information to the users file using save_users_to_file method.
+                - Print "Password reset successful. You can now log in with your new password."
+            v. If the entered OTP is invalid, print "Invalid OTP. Password reset failed."
+        d. If the entered email is invalid or does not match the stored email, print "Invalid email or email format."
+    3. If the user is not found, print "User not found."
+
+
+Method is_valid_email(email):
+    1. Define the email_regex pattern.
+    2. Use the re.match function to check if the provided email matches the pattern.
+    3. Return True if the match is not None, else return False.
+
+
+
+Method generate_otp():
+    1. Generate a random 6-digit OTP using the random.choices function.
+    2. Return the generated OTP.
+
+Method send_otp_email(username, to_email, otp):
+    1. Set subject to "Password Reset OTP".
+    2. Create the body of the email with the username and OTP.
+    3. Try sending the email:
+        a. Call send_email(subject, body, to_email) to send the email.
+        b. Print "OTP sent successfully. Check your email."
+    4. Catch and handle any exceptions:
+        a. Print f"Error sending OTP email: {e}" if an exception occurs during email sending.
+
+
+
+Method create_booking(room_index, start_time, end_time):
+    1. Get the room_name from the room_names list using room_index.
+    2. Validate start_time and end_time using validate_datetime method.
+    3. If start_time is not in the future, print "Error: Booking time must be in the future." and return.
+    4. If start_time is greater than or equal to end_time, print "Error: End time must be after start time." and return.
+    5. Create a new_booking dictionary with 'room_name', 'start_time', and 'end_time'.
+    6. If new_booking has no conflict with existing bookings:
+        a. Append new_booking to the bookings list.
+        b. Print "Booking created successfully."
+        c. Call save_user_bookings() to update the user's booking file.
+        d. Call send_booking_confirmation_email(new_booking) to send a confirmation email to the user.
+    7. Else, print "Error: Room already booked for the given time slot. Removing the room from available rooms."
+        a. Remove the room_name from the room_names list.
+        b. Print available rooms.
+
+
+Method validate_datetime(datetime_str):
+    1. Try to parse datetime_str using datetime.strptime with format '%Y-%m-%d %H:%M:%S'.
+    2. If successful, return the parsed datetime.
+    3. If ValueError occurs, print "Error: Invalid date-time format. Please use 'YYYY-MM-DD HH:MM:SS'" and return None.
+
+
+
+Method read_bookings():
+    1. If bookings list is empty, print "No bookings found."
+    2. Else, iterate through each booking in the bookings list:
+        a. Print booking details with index, room_name, start_time, and end_time.
+
+
+
+Method update_booking(index, room_index, new_start_time, new_end_time):
+    1. Try the following block:
+        a. Get the room_name from the room_names list using room_index.
+        b. Validate new_start_time and new_end_time formats using validate_datetime method.
+        c. If new_start_time is greater than or equal to new_end_time, print "Error: End time must be after start time."
+        d. Create updated_booking dictionary with room_name, new_start_time, and new_end_time.
+        e. If no conflict with existing bookings for updated_booking:
+            i. Update the bookings list at index - 1 with updated_booking.
+            ii. Call save_user_bookings() to save changes to the user's bookings file.
+            iii. Call send_booking_update_email(updated_booking) to notify the user.
+            iv. Print "Booking updated successfully."
+        f. Else, print "Error: Room already booked for the given time slot. Removing the room from available rooms."
+            i. Remove the room at room_index from room_names.
+            ii. Print available rooms.
+    2. Except ValueError:
+        a. Print "Error: Invalid date-time format. Please use 'YYYY-MM-DD HH:MM:SS'."
+
+
+
+Method delete_booking(index):
+    1. Check if 1 <= index <= len(bookings):
+        a. Get deleted_room_name from the bookings list at index - 1.
+        b. Remove the booking at index - 1 from the bookings list.
+        c. Add deleted_room_name back to room_names.
+        d. Print "Booking deleted successfully. Room {deleted_room_name} added back to available rooms."
+        e. Print available rooms.
+        f. Call save_user_bookings() to save changes to the user's bookings file.
+    2. Else, print "Error: Invalid booking index."
+
+
+
+Method save_users_to_file():
+    1. Open "users.json" file in write mode.
+    2. Serialize users' data to JSON format.
+    3. Write the JSON data to the file.
+    4. Close the file.
+
+
+
+Method load_user(username):
+    1. Iterate over users list.
+    2. If a user with the given username is found, return that user.
+    3. If no user is found, return None.
+
+
+
+Method generate_otp():
+    1. Generate a random 6-digit OTP using the random.choices function.
+    2. Return the generated OTP.
+
+
+
+Method send_otp_email(username, to_email, otp):
+    1. Set subject to "Password Reset OTP".
+    2. Create the body of the email with the username and OTP.
+    3. Try sending the email:
+        a. Call send_email(subject, body, to_email) to send the email.
+        b. Print "OTP sent successfully. Check your email."
+    4. Catch and handle any exceptions:
+        a. Print f"Error sending OTP email: {e}" if an exception occurs during email sending.
+
+
+
+
