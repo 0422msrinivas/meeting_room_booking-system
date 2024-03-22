@@ -1,7 +1,5 @@
 # meeting_room_booking-system
-Certainly! Below is a template for the README.md file in your GitHub repository based on the provided Python code:
 
-```markdown
 # Meeting Room Booking System
 
 A simple command-line based meeting room booking system implemented in Python. This system allows users to sign up, log in, create, read, update, and delete bookings for meeting rooms. It also includes features like password hashing, email notifications, and OTP-based password reset.
